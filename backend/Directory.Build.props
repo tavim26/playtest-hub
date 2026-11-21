@@ -1,0 +1,15 @@
+<Project>
+  <!-- Applies to every project under backend/ -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Module projects (not their Contracts) and Shared.Infrastructure need ASP.NET Core types -->
+  <ItemGroup Condition="('$(MSBuildProjectName.StartsWith(`PlaytestHub.Modules.`))' == 'true' And '$(MSBuildProjectName.EndsWith(`.Contracts`))' != 'true') Or '$(MSBuildProjectName)' == 'PlaytestHub.Shared.Infrastructure'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PlaytestHub.Api/PlaytestHub.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Access/">
+    <Project Path="src/Modules/Access/PlaytestHub.Modules.Access.Contracts/PlaytestHub.Modules.Access.Contracts.csproj" />
+    <Project Path="src/Modules/Access/PlaytestHub.Modules.Access/PlaytestHub.Modules.Access.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Feedback/">
+    <Project Path="src/Modules/Feedback/PlaytestHub.Modules.Feedback.Contracts/PlaytestHub.Modules.Feedback.Contracts.csproj" />
+    <Project Path="src/Modules/Feedback/PlaytestHub.Modules.Feedback/PlaytestHub.Modules.Feedback.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/PlaytestHub.Modules.Identity.Contracts/PlaytestHub.Modules.Identity.Contracts.csproj" />
+    <Project Path="src/Modules/Identity/PlaytestHub.Modules.Identity/PlaytestHub.Modules.Identity.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Reputation/">
+    <Project Path="src/Modules/Reputation/PlaytestHub.Modules.Reputation.Contracts/PlaytestHub.Modules.Reputation.Contracts.csproj" />
+    <Project Path="src/Modules/Reputation/PlaytestHub.Modules.Reputation/PlaytestHub.Modules.Reputation.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Studio/">
+    <Project Path="src/Modules/Studio/PlaytestHub.Modules.Studio.Contracts/PlaytestHub.Modules.Studio.Contracts.csproj" />
+    <Project Path="src/Modules/Studio/PlaytestHub.Modules.Studio/PlaytestHub.Modules.Studio.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/PlaytestHub.Shared.Infrastructure/PlaytestHub.Shared.Infrastructure.csproj" />
+    <Project Path="src/Shared/PlaytestHub.Shared.Kernel/PlaytestHub.Shared.Kernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PlaytestHub.ArchitectureTests/PlaytestHub.ArchitectureTests.csproj" />
+    <Project Path="tests/PlaytestHub.IntegrationTests/PlaytestHub.IntegrationTests.csproj" />
+    <Project Path="tests/PlaytestHub.UnitTests/PlaytestHub.UnitTests.csproj" />
+  </Folder>
+</Solution>

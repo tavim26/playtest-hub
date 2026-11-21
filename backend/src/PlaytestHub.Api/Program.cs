@@ -4,6 +4,8 @@ using PlaytestHub.Modules.Identity;
 using PlaytestHub.Modules.Reputation;
 using PlaytestHub.Modules.Studio;
 using PlaytestHub.Shared.Infrastructure;
+using PlaytestHub.Shared.Infrastructure.Database;
+
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +35,7 @@ app.UseSerilogRequestLogging();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.ApplyMigrationsAsync();
 }
 
 app.UseHttpsRedirection();

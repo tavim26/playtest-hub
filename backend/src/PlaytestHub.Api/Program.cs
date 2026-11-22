@@ -6,6 +6,8 @@ using PlaytestHub.Modules.Studio;
 using PlaytestHub.Shared.Infrastructure;
 using PlaytestHub.Shared.Infrastructure.Database;
 
+using PlaytestHub.Shared.Infrastructure.Authentication;
+
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +20,9 @@ var connectionString = builder.Configuration.GetConnectionString("Database")
 
 builder.Services.AddOpenApi();
 builder.Services.AddSharedInfrastructure();
+builder.Services.AddSharedInfrastructure();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
 builder.Services.AddHealthChecks().AddNpgSql(connectionString);
 
 builder.Services
@@ -39,6 +44,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 

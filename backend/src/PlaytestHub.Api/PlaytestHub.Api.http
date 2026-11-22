@@ -8,3 +8,66 @@ GET {{baseUrl}}/api/identity/ping
 
 ### OpenAPI document
 GET {{baseUrl}}/openapi/v1.json
+
+
+### Register - success
+POST {{baseUrl}}/api/identity/register
+Content-Type: application/json
+
+{
+  "email": "tester@playtesthub.dev",
+  "password": "Parola123!",
+  "displayName": "First Tester"
+}
+
+### Register - same email again (expect 409)
+POST {{baseUrl}}/api/identity/register
+Content-Type: application/json
+
+{
+  "email": "tester@playtesthub.dev",
+  "password": "Parola123!",
+  "displayName": "Duplicate"
+}
+
+### Register - invalid data (expect 400 with field errors)
+POST {{baseUrl}}/api/identity/register
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "123",
+  "displayName": ""
+}
+
+
+
+
+### Login - saves the token for the next requests
+POST {{baseUrl}}/api/identity/login
+Content-Type: application/json
+
+{
+  "email": "tester@playtesthub.dev",
+  "password": "Parola123!"
+}
+
+> {%
+    client.global.set("accessToken", response.body.accessToken);
+%}
+
+### Login - wrong password (expect 401)
+POST {{baseUrl}}/api/identity/login
+Content-Type: application/json
+
+{
+  "email": "tester@playtesthub.dev",
+  "password": "WrongPassword1!"
+}
+
+### Current user (run Login first)
+GET {{baseUrl}}/api/identity/me
+Authorization: Bearer {{accessToken}}
+
+### Current user without token (expect 401)
+GET {{baseUrl}}/api/identity/me

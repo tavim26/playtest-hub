@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -41,4 +42,15 @@ internal sealed class TokenService(IOptions<JwtOptions> options) : ITokenService
 
         return new AccessToken(token, expiresAtUtc);
     }
+    
+    public GeneratedRefreshToken CreateRefreshToken()
+    {
+        // 64 cryptographically random bytes, not guessable
+        var value = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+        return new GeneratedRefreshToken(value, HashRefreshToken(value), DateTime.UtcNow.AddDays(_jwt.RefreshTokenDays));
+    }
+
+    public string HashRefreshToken(string refreshToken) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
 }

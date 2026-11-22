@@ -33,6 +33,7 @@ public static class IdentityModule
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IDataSeeder, IdentitySeeder>();
         
         services.AddValidatorsFromAssembly(typeof(IdentityModule).Assembly, includeInternalTypes: true);
 

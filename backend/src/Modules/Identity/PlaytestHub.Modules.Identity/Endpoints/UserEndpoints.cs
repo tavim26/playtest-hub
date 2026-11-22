@@ -21,8 +21,17 @@ internal static class UserEndpoints
 
         group.MapPost("/login", LoginAsync)
             .WithRequestValidation<LoginRequest>()
-            .Produces<LoginResponse>()
+            .Produces<AuthResponse>()
             .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        group.MapPost("/refresh", RefreshAsync)
+            .WithRequestValidation<RefreshTokenRequest>()
+            .Produces<AuthResponse>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        group.MapPost("/logout", LogoutAsync)
+            .WithRequestValidation<RefreshTokenRequest>()
+            .Produces(StatusCodes.Status204NoContent);
 
         group.MapGet("/me", GetCurrentUserAsync)
             .RequireAuthorization()
@@ -41,6 +50,20 @@ internal static class UserEndpoints
         var result = await userService.LoginAsync(request);
 
         return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblem();
+    }
+
+    private static async Task<IResult> RefreshAsync(RefreshTokenRequest request, IUserService userService)
+    {
+        var result = await userService.RefreshAsync(request);
+
+        return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblem();
+    }
+
+    private static async Task<IResult> LogoutAsync(RefreshTokenRequest request, IUserService userService)
+    {
+        await userService.LogoutAsync(request);
+
+        return Results.NoContent();
     }
 
     private static async Task<IResult> GetCurrentUserAsync(ClaimsPrincipal principal, IUserService userService)

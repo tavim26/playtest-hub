@@ -41,6 +41,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     await app.ApplyMigrationsAsync();
+    await app.SeedDataAsync();
 }
 
 app.UseHttpsRedirection();

@@ -42,8 +42,7 @@ Content-Type: application/json
 
 
 
-
-### Login - saves the token for the next requests
+### Login - saves both tokens
 POST {{baseUrl}}/api/identity/login
 Content-Type: application/json
 
@@ -54,20 +53,44 @@ Content-Type: application/json
 
 > {%
     client.global.set("accessToken", response.body.accessToken);
+    client.global.set("refreshToken", response.body.refreshToken);
 %}
 
-### Login - wrong password (expect 401)
+### Refresh - rotates the refresh token
+POST {{baseUrl}}/api/identity/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    client.global.set("previousRefreshToken", client.global.get("refreshToken"));
+    client.global.set("accessToken", response.body.accessToken);
+    client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### Refresh with the OLD token (expect 401, all sessions revoked)
+POST {{baseUrl}}/api/identity/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{previousRefreshToken}}"
+}
+
+### Logout
+POST {{baseUrl}}/api/identity/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Admin login - token contains "role": "Moderator"
 POST {{baseUrl}}/api/identity/login
 Content-Type: application/json
 
 {
-  "email": "tester@playtesthub.dev",
-  "password": "WrongPassword1!"
+  "email": "admin@playtesthub.dev",
+  "password": "Admin123!"
 }
-
-### Current user (run Login first)
-GET {{baseUrl}}/api/identity/me
-Authorization: Bearer {{accessToken}}
-
-### Current user without token (expect 401)
-GET {{baseUrl}}/api/identity/me

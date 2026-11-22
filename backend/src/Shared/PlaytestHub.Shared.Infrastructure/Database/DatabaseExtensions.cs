@@ -36,4 +36,14 @@ public static class DatabaseExtensions
             await migrator.MigrateAsync(CancellationToken.None);
         }
     }
+    
+    public static async Task SeedDataAsync(this IHost app)
+    {
+        using var scope = app.Services.CreateScope();
+
+        foreach (var seeder in scope.ServiceProvider.GetServices<IDataSeeder>())
+        {
+            await seeder.SeedAsync(CancellationToken.None);
+        }
+    }
 }

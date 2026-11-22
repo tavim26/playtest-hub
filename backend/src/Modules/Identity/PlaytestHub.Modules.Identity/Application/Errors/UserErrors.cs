@@ -16,4 +16,7 @@ internal static class UserErrors
 
     public static Error CreationFailed(string description) =>
         Error.Validation("Users.CreationFailed", description);
+    
+    public static readonly Error InvalidRefreshToken =
+        Error.Unauthorized("Users.InvalidRefreshToken", "The refresh token is invalid or expired.");
 }

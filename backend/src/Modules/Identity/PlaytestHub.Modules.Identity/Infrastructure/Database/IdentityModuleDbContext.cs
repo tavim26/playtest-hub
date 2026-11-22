@@ -10,6 +10,8 @@ internal sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbC
 {
     public const string Schema = "identity";
 
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -19,6 +21,23 @@ internal sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbC
         builder.Entity<User>(user =>
         {
             user.Property(u => u.DisplayName).HasMaxLength(100).IsRequired();
+        });
+
+        builder.Entity<RefreshToken>(token =>
+        {
+            token.ToTable("RefreshTokens");
+            token.HasKey(t => t.Id);
+
+            token.Property(t => t.TokenHash).HasMaxLength(64).IsRequired();
+            token.HasIndex(t => t.TokenHash).IsUnique();
+
+            token.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            token.Ignore(t => t.IsActive);
+            token.Ignore(t => t.DomainEvents);
         });
     }
 }

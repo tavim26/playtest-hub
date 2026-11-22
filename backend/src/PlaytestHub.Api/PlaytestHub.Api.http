@@ -1,0 +1,10 @@
+@baseUrl = http://localhost:5270
+
+### Health
+GET {{baseUrl}}/health
+
+### Identity module
+GET {{baseUrl}}/api/identity/ping
+
+### OpenAPI document
+GET {{baseUrl}}/openapi/v1.json

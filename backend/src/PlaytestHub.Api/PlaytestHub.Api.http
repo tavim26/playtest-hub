@@ -8,3 +8,89 @@ GET {{baseUrl}}/api/identity/ping
 
 ### OpenAPI document
 GET {{baseUrl}}/openapi/v1.json
+
+
+### Register - success
+POST {{baseUrl}}/api/identity/register
+Content-Type: application/json
+
+{
+  "email": "tester@playtesthub.dev",
+  "password": "Parola123!",
+  "displayName": "First Tester"
+}
+
+### Register - same email again (expect 409)
+POST {{baseUrl}}/api/identity/register
+Content-Type: application/json
+
+{
+  "email": "tester@playtesthub.dev",
+  "password": "Parola123!",
+  "displayName": "Duplicate"
+}
+
+### Register - invalid data (expect 400 with field errors)
+POST {{baseUrl}}/api/identity/register
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "123",
+  "displayName": ""
+}
+
+
+
+### Login - saves both tokens
+POST {{baseUrl}}/api/identity/login
+Content-Type: application/json
+
+{
+  "email": "tester@playtesthub.dev",
+  "password": "Parola123!"
+}
+
+> {%
+    client.global.set("accessToken", response.body.accessToken);
+    client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### Refresh - rotates the refresh token
+POST {{baseUrl}}/api/identity/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    client.global.set("previousRefreshToken", client.global.get("refreshToken"));
+    client.global.set("accessToken", response.body.accessToken);
+    client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### Refresh with the OLD token (expect 401, all sessions revoked)
+POST {{baseUrl}}/api/identity/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{previousRefreshToken}}"
+}
+
+### Logout
+POST {{baseUrl}}/api/identity/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Admin login - token contains "role": "Moderator"
+POST {{baseUrl}}/api/identity/login
+Content-Type: application/json
+
+{
+  "email": "admin@playtesthub.dev",
+  "password": "Admin123!"
+}

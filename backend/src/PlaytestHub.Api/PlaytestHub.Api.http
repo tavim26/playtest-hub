@@ -94,3 +94,98 @@ Content-Type: application/json
   "email": "admin@playtesthub.dev",
   "password": "Admin123!"
 }
+
+
+
+
+
+
+### Admin login - saves adminToken
+POST {{baseUrl}}/api/identity/login
+Content-Type: application/json
+
+{
+  "email": "admin@playtesthub.dev",
+  "password": "Admin123!"
+}
+
+> {%
+    client.global.set("adminToken", response.body.accessToken);
+%}
+
+### Create game (as tester)
+POST {{baseUrl}}/api/studio/games
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Hollow Depths",
+  "description": "A hand-drawn metroidvania about a lantern keeper.",
+  "genre": "Metroidvania",
+  "platforms": ["Windows", "Linux", "SteamDeck"],
+  "minimumSpecs": "GTX 1050, 8 GB RAM"
+}
+
+> {%
+    client.global.set("gameId", response.body.id);
+%}
+
+### My games
+GET {{baseUrl}}/api/studio/games/mine
+Authorization: Bearer {{accessToken}}
+
+### Game details
+GET {{baseUrl}}/api/studio/games/{{gameId}}
+Authorization: Bearer {{accessToken}}
+
+### Update as non-owner (expect 403)
+PUT {{baseUrl}}/api/studio/games/{{gameId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Hijacked",
+  "description": "",
+  "genre": "Horror",
+  "platforms": ["Web"],
+  "minimumSpecs": null
+}
+
+### Add collaborator (as owner)
+POST {{baseUrl}}/api/studio/games/{{gameId}}/collaborators
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "admin@playtesthub.dev"
+}
+
+> {%
+    client.global.set("collaboratorId", response.body.members[1].userId);
+%}
+
+### Add the same collaborator again (expect 409)
+POST {{baseUrl}}/api/studio/games/{{gameId}}/collaborators
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "admin@playtesthub.dev"
+}
+
+### Remove collaborator (expect 204)
+DELETE {{baseUrl}}/api/studio/games/{{gameId}}/collaborators/{{collaboratorId}}
+Authorization: Bearer {{accessToken}}
+
+### Invalid genre (expect 400, not 500)
+POST {{baseUrl}}/api/studio/games
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Broken",
+  "description": "",
+  "genre": "Banana",
+  "platforms": ["Windows"],
+  "minimumSpecs": null
+}

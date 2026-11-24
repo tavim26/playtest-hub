@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using PlaytestHub.Shared.Infrastructure.Errors;
+using System.Text.Json.Serialization;
 
 namespace PlaytestHub.Shared.Infrastructure;
 
@@ -9,6 +10,9 @@ public static class InfrastructureExtensions
     {
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
+        
+        services.ConfigureHttpJsonOptions(options =>
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         return services;
     }

@@ -12,6 +12,7 @@ using PlaytestHub.Modules.Identity.Endpoints;
 using PlaytestHub.Modules.Identity.Infrastructure.Database;
 using PlaytestHub.Shared.Infrastructure.Database;
 
+using PlaytestHub.Modules.Identity.Contracts;
 using PlaytestHub.Modules.Identity.Infrastructure.Authentication;
 
 namespace PlaytestHub.Modules.Identity;
@@ -34,6 +35,7 @@ public static class IdentityModule
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IDataSeeder, IdentitySeeder>();
+        services.AddScoped<IUserLookup, UserLookup>();
         
         services.AddValidatorsFromAssembly(typeof(IdentityModule).Assembly, includeInternalTypes: true);
 

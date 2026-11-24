@@ -14,9 +14,20 @@ internal sealed class GlobalExceptionHandler(
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Unhandled exception occurred");
+        var (status, title) = exception is BadHttpRequestException badRequest
+            ? (badRequest.StatusCode, "Bad request")
+            : (StatusCodes.Status500InternalServerError, "Server error");
 
-        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        if (status >= StatusCodes.Status500InternalServerError)
+        {
+            logger.LogError(exception, "Unhandled exception occurred");
+        }
+        else
+        {
+            logger.LogWarning("Bad request: {Message}", exception.Message);
+        }
+
+        httpContext.Response.StatusCode = status;
 
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
@@ -24,9 +35,9 @@ internal sealed class GlobalExceptionHandler(
             Exception = exception,
             ProblemDetails = new ProblemDetails
             {
-                Status = StatusCodes.Status500InternalServerError,
-                Title = "Server error",
-                Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
+                Status = status,
+                Title = title,
+                Detail = status < StatusCodes.Status500InternalServerError ? exception.Message : null
             }
         });
     }

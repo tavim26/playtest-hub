@@ -4,6 +4,7 @@
     <ProjectReference Include="..\..\..\Shared\PlaytestHub.Shared.Kernel\PlaytestHub.Shared.Kernel.csproj" />
     <ProjectReference Include="..\..\..\Shared\PlaytestHub.Shared.Infrastructure\PlaytestHub.Shared.Infrastructure.csproj" />
     <ProjectReference Include="..\PlaytestHub.Modules.Studio.Contracts\PlaytestHub.Modules.Studio.Contracts.csproj" />
+    <ProjectReference Include="..\..\Identity\PlaytestHub.Modules.Identity.Contracts\PlaytestHub.Modules.Identity.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -94,3 +94,249 @@ Content-Type: application/json
   "email": "admin@playtesthub.dev",
   "password": "Admin123!"
 }
+
+
+
+
+
+
+### Admin login - saves adminToken
+POST {{baseUrl}}/api/identity/login
+Content-Type: application/json
+
+{
+  "email": "admin@playtesthub.dev",
+  "password": "Admin123!"
+}
+
+> {%
+    client.global.set("adminToken", response.body.accessToken);
+%}
+
+### Create game (as tester)
+POST {{baseUrl}}/api/studio/games
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Hollow Depths",
+  "description": "A hand-drawn metroidvania about a lantern keeper.",
+  "genre": "Metroidvania",
+  "platforms": ["Windows", "Linux", "SteamDeck"],
+  "minimumSpecs": "GTX 1050, 8 GB RAM"
+}
+
+> {%
+    client.global.set("gameId", response.body.id);
+%}
+
+### My games
+GET {{baseUrl}}/api/studio/games/mine
+Authorization: Bearer {{accessToken}}
+
+### Game details
+GET {{baseUrl}}/api/studio/games/{{gameId}}
+Authorization: Bearer {{accessToken}}
+
+### Update as non-owner (expect 403)
+PUT {{baseUrl}}/api/studio/games/{{gameId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Hijacked",
+  "description": "",
+  "genre": "Horror",
+  "platforms": ["Web"],
+  "minimumSpecs": null
+}
+
+### Add collaborator (as owner)
+POST {{baseUrl}}/api/studio/games/{{gameId}}/collaborators
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "admin@playtesthub.dev"
+}
+
+> {%
+    client.global.set("collaboratorId", response.body.members[1].userId);
+%}
+
+### Add the same collaborator again (expect 409)
+POST {{baseUrl}}/api/studio/games/{{gameId}}/collaborators
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "admin@playtesthub.dev"
+}
+
+### Remove collaborator (expect 204)
+DELETE {{baseUrl}}/api/studio/games/{{gameId}}/collaborators/{{collaboratorId}}
+Authorization: Bearer {{accessToken}}
+
+### Invalid genre (expect 400, not 500)
+POST {{baseUrl}}/api/studio/games
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "Broken",
+  "description": "",
+  "genre": "Banana",
+  "platforms": ["Windows"],
+  "minimumSpecs": null
+}
+
+
+
+### Create campaign (owner)
+POST {{baseUrl}}/api/studio/games/{{gameId}}/campaigns
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "buildVersion": "v0.3.1-alpha",
+  "description": "Test the first two chapters and the new dash ability.",
+  "seats": 25,
+  "minimumReputation": 0,
+  "startsAt": "2026-12-01T00:00:00Z",
+  "endsAt": "2026-12-31T00:00:00Z",
+  "scenarios": [
+    { "title": "Chapter 1", "description": "Complete Chapter 1 without using the dash ability." },
+    { "title": "Boss fight", "description": "Defeat the lantern guardian and report the difficulty." }
+  ]
+}
+
+> {%
+    client.global.set("campaignId", response.body.id);
+%}
+
+### Create campaign without scenarios
+POST {{baseUrl}}/api/studio/games/{{gameId}}/campaigns
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "buildVersion": "v0.3.2-alpha",
+  "description": "",
+  "seats": 10,
+  "minimumReputation": 0,
+  "startsAt": "2026-12-01T00:00:00Z",
+  "endsAt": "2026-12-31T00:00:00Z",
+  "scenarios": []
+}
+
+> {%
+    client.global.set("emptyCampaignId", response.body.id);
+%}
+
+### Submit the empty one (expect 400, Campaigns.NoScenarios)
+POST {{baseUrl}}/api/studio/campaigns/{{emptyCampaignId}}/submit
+Authorization: Bearer {{accessToken}}
+
+### Submit as non-owner (expect 403)
+POST {{baseUrl}}/api/studio/campaigns/{{campaignId}}/submit
+Authorization: Bearer {{adminToken}}
+
+### Submit (owner) - status becomes PendingReview
+POST {{baseUrl}}/api/studio/campaigns/{{campaignId}}/submit
+Authorization: Bearer {{accessToken}}
+
+### Edit while pending (expect 409, Campaigns.NotEditable)
+PUT {{baseUrl}}/api/studio/campaigns/{{campaignId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "buildVersion": "v0.3.1-alpha",
+  "description": "Edited",
+  "seats": 25,
+  "minimumReputation": 0,
+  "startsAt": "2026-12-01T00:00:00Z",
+  "endsAt": "2026-12-31T00:00:00Z",
+  "scenarios": [ { "title": "Chapter 1", "description": "x" } ]
+}
+
+### Approve as non-moderator (expect 403)
+POST {{baseUrl}}/api/studio/moderation/campaigns/{{campaignId}}/approve
+Authorization: Bearer {{accessToken}}
+
+### Reject (moderator)
+POST {{baseUrl}}/api/studio/moderation/campaigns/{{campaignId}}/reject
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Scenario descriptions are too vague."
+}
+
+### Edit after rejection (owner) - allowed, status stays Rejected until resubmitted
+PUT {{baseUrl}}/api/studio/campaigns/{{campaignId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "buildVersion": "v0.3.1-alpha",
+  "description": "Test the first two chapters and the new dash ability.",
+  "seats": 25,
+  "minimumReputation": 0,
+  "startsAt": "2026-12-01T00:00:00Z",
+  "endsAt": "2026-12-31T00:00:00Z",
+  "scenarios": [
+    { "title": "Chapter 1", "description": "Complete Chapter 1 without the dash ability and note every spot where you got stuck." },
+    { "title": "Boss fight", "description": "Defeat the lantern guardian, then rate the difficulty from 1 to 10." }
+  ]
+}
+
+### Submit again
+POST {{baseUrl}}/api/studio/campaigns/{{campaignId}}/submit
+Authorization: Bearer {{accessToken}}
+
+### Approve (moderator) - status becomes Published
+POST {{baseUrl}}/api/studio/moderation/campaigns/{{campaignId}}/approve
+Authorization: Bearer {{adminToken}}
+
+### Approve again (expect 409, Campaigns.InvalidTransition)
+POST {{baseUrl}}/api/studio/moderation/campaigns/{{campaignId}}/approve
+Authorization: Bearer {{adminToken}}
+
+### Campaigns of the game
+GET {{baseUrl}}/api/studio/games/{{gameId}}/campaigns
+Authorization: Bearer {{accessToken}}
+
+
+
+
+
+### Public list - no token needed
+GET {{baseUrl}}/api/studio/public/campaigns
+
+### Filter by genre and platform
+GET {{baseUrl}}/api/studio/public/campaigns?genre=Metroidvania&platform=Linux
+
+### Text search on the game title
+GET {{baseUrl}}/api/studio/public/campaigns?search=hollow
+
+### Pagination
+GET {{baseUrl}}/api/studio/public/campaigns?page=1&pageSize=1
+
+### Public details (with scenarios)
+GET {{baseUrl}}/api/studio/public/campaigns/{{campaignId}}
+
+### Moderation queue (moderator only)
+GET {{baseUrl}}/api/studio/moderation/campaigns/pending
+Authorization: Bearer {{adminToken}}
+
+### Moderation queue as regular user (expect 403)
+GET {{baseUrl}}/api/studio/moderation/campaigns/pending
+Authorization: Bearer {{accessToken}}
+
+### Close the campaign (owner)
+POST {{baseUrl}}/api/studio/campaigns/{{campaignId}}/close
+Authorization: Bearer {{accessToken}}
+
+### Closed campaign disappears from the public details (expect 404)
+GET {{baseUrl}}/api/studio/public/campaigns/{{campaignId}}

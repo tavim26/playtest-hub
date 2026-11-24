@@ -18,18 +18,25 @@ public static class StudioModule
         services.AddModuleDbContext<StudioDbContext>(configuration, StudioDbContext.Schema);
 
         services.AddScoped<IGameService, GameService>();
+        services.AddScoped<ICampaignService, CampaignService>();
         services.AddValidatorsFromAssembly(typeof(StudioModule).Assembly, includeInternalTypes: true);
+        services.AddScoped<ICampaignCatalog, CampaignCatalog>();
+        services.AddScoped<ICampaignReader, CampaignReader>();
 
         return services;
     }
 
     public static IEndpointRouteBuilder MapStudioEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/studio")
-            .WithTags("Studio")
-            .RequireAuthorization();
+        var api = app.MapGroup("/api/studio").WithTags("Studio");
 
-        group.MapGameEndpoints();
+        api.MapPublicCampaignEndpoints();
+
+        var secured = api.MapGroup(string.Empty).RequireAuthorization();
+
+        secured.MapGameEndpoints();
+        secured.MapCampaignEndpoints();
+        secured.MapModerationEndpoints();
 
         return app;
     }

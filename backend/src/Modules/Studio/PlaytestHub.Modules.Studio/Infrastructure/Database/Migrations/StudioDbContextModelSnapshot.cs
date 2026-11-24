@@ -23,6 +23,60 @@ namespace PlaytestHub.Modules.Studio.Infrastructure.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.Campaign", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BuildVersion")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime>("EndsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("MinimumReputation")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("Seats")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("Status", "PublishedAtUtc");
+
+                    b.ToTable("Campaigns", "studio");
+                });
+
             modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.Game", b =>
                 {
                     b.Property<Guid>("Id")
@@ -86,6 +140,43 @@ namespace PlaytestHub.Modules.Studio.Infrastructure.Database.Migrations
                     b.ToTable("GameMembers", "studio");
                 });
 
+            modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.TestScenario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
+
+                    b.ToTable("TestScenarios", "studio");
+                });
+
+            modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.Campaign", b =>
+                {
+                    b.HasOne("PlaytestHub.Modules.Studio.Domain.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.GameMember", b =>
                 {
                     b.HasOne("PlaytestHub.Modules.Studio.Domain.Game", null)
@@ -93,6 +184,20 @@ namespace PlaytestHub.Modules.Studio.Infrastructure.Database.Migrations
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.TestScenario", b =>
+                {
+                    b.HasOne("PlaytestHub.Modules.Studio.Domain.Campaign", null)
+                        .WithMany("Scenarios")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.Campaign", b =>
+                {
+                    b.Navigation("Scenarios");
                 });
 
             modelBuilder.Entity("PlaytestHub.Modules.Studio.Domain.Game", b =>
